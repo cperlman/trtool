@@ -17,7 +17,7 @@
             aarch64-linux = nixpkgs.lib.fakeHash;  # not built yet
             i686-linux = nixpkgs.lib.fakeHash;  # not built yet
             x86_64-darwin = "nixpkgs.lib.fakeHash";  # not built yet
-            x86_64-linux = "900c4c5545c6e401bc0ea90ec8310094e2d320b7498c3cba9dd8f1ea633a5174";
+            x86_64-linux = "5cb5aba4e83b77ea1f969aa7bcd6d2e04509485ba4fb76e7ae4895daa7cf7527";
           };
           expectedOutputHash = outputHashes."${system}";
         in {
@@ -31,13 +31,12 @@
               ++ lib.optional stdenv.isDarwin (darwin.apple_sdk.frameworks.PCSC);
             nativeBuildInputs = lib.optionals stdenv.isLinux [ pkg-config ];
             doCheck = false;  # don't run the unit test to save time
-
+            postFixup = ''
+              echo 'testing reproducibility (expected: sha256sum $out/bin/trtool: ${expectedOutputHash})'
+              test "$(cat $out/bin/trtool | sha256sum)" = '${expectedOutputHash}  -'
+            '';
           };
         });
     };
 }
 
-#postFixup = ''
-#    echo 'testing reproducibility (expected: sha256sum $out/bin/trtool: ${expectedOutputHash})'
-#    test "$(cat $out/bin/trtool | sha256sum)" = '${expectedOutputHash}  -'
-#'';
